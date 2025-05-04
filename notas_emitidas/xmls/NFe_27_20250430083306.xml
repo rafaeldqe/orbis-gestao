@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<NFe>
+  <infNFe Id="NFe12345678901234567890123456789012345678901234" versao="4.00">
+    <emit>
+      <CNPJ>12345678000195</CNPJ>
+      <xNome>Orbis Gestão Ltda</xNome>
+      <enderEmit/>
+      <IE>1234567890</IE>
+      <CRT>3</CRT>
+    </emit>
+    <dest>
+      <CPF>00000000191</CPF>
+      <xNome>Consumidor Final</xNome>
+    </dest>
+    <det nItem="1">
+      <prod>
+        <cProd>1</cProd>
+        <xProd>celular</xProd>
+        <qCom>1</qCom>
+        <vUnCom>7000.00</vUnCom>
+        <vProd>7000.00</vProd>
+        <CFOP>5102</CFOP>
+        <uCom>UN</uCom>
+      </prod>
+      <imposto>
+        <ICMS>
+          <CST>102</CST>
+        </ICMS>
+      </imposto>
+    </det>
+    <total>
+      <ICMSTot>
+        <vProd>6500.00</vProd>
+        <vNF>6500.00</vNF>
+      </ICMSTot>
+    </total>
+    <pag>
+      <detPag>
+        <tPag>01</tPag>
+        <vPag>6500.00</vPag>
+      </detPag>
+    </pag>
+  </infNFe>
+</NFe>
