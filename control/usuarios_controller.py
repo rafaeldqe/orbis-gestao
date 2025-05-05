@@ -18,7 +18,7 @@ def autenticar_usuario(usuario, senha):
     """
     usuarios = listar_todos()
     for u in usuarios:
-        # u[2] = usuario | u[3] = senha | u[4] = status ('ativo')
-        if u[2] == usuario and u[3] == senha and u[4] == 'ativo':
+        # u[2] = usuario | u[3] = senha | u[5] = ativo (1 ou 0)
+        if u[2].strip().lower() == usuario.strip().lower() and u[3] == senha and u[5] == 1:
             return True
     return False

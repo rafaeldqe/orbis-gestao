@@ -33,3 +33,16 @@ def registrar_pagamento(conta_id):
     """, (data_pagamento, conta_id))
     conn.commit()
     conn.close()
+
+def criar_conta_receber(venda_id, cliente_id, valor_total, vencimento, forma_pagamento="boleto"):
+    """
+    Função compatível com o controller de vendas para geração automática da conta.
+    """
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO contas_receber (venda_id, cliente_id, valor_total, vencimento, forma_pagamento, status)
+        VALUES (?, ?, ?, ?, ?, 'pendente')
+    """, (venda_id, cliente_id, valor_total, vencimento, forma_pagamento))
+    conn.commit()
+    conn.close()

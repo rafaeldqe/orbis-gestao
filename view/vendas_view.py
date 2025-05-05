@@ -4,7 +4,7 @@ import control.vendas_controller as controller
 import control.produtos_controller as produtos_controller
 import control.clientes_pf_controller as clientes_pf_controller
 import control.clientes_pj_controller as clientes_pj_controller
-import control.contas_receber_controller as contas_receber_controller  # ✅ novo
+import control.contas_receber_controller as contas_receber_controller
 import datetime
 from view.selecionar_produto_view import SelecionarProdutoView
 from util.dav import gerar_dav_pdf
@@ -23,14 +23,12 @@ class VendasView(tk.Toplevel):
         frame = tk.Frame(self, padx=20, pady=20)
         frame.pack(fill="both", expand=True)
 
-        # Cliente
         cliente_frame = tk.Frame(frame)
         cliente_frame.pack(anchor="w")
         tk.Button(cliente_frame, text="👤 Selecionar Cliente", command=self.dialogo_tipo_cliente).pack(side="left")
         self.label_cliente = tk.Label(cliente_frame, text="Cliente: Consumidor Final", font=("Arial", 10))
         self.label_cliente.pack(side="left", padx=10)
 
-        # Busca Produto
         topo = tk.Frame(frame)
         topo.pack(anchor="w")
         tk.Label(topo, text="Produto:").pack(side="left")
@@ -43,7 +41,6 @@ class VendasView(tk.Toplevel):
         self.entrada_quantidade.pack(side="left")
         tk.Button(topo, text="➕ Adicionar", command=self.adicionar_item).pack(side="left", padx=5)
 
-        # Carrinho
         colunas = ("Produto", "Qtd", "Unitário", "Subtotal")
         self.tabela = ttk.Treeview(frame, columns=colunas, show="headings", height=15)
         for col in colunas:
@@ -52,7 +49,6 @@ class VendasView(tk.Toplevel):
         self.tabela.pack(pady=10)
         self.tabela.bind("<Delete>", self.remover_item)
 
-        # Total e Pagamento
         rodape = tk.Frame(frame)
         rodape.pack(anchor="w", pady=10)
         tk.Label(rodape, text="Desconto (R$):").grid(row=0, column=0, sticky="w")
@@ -61,14 +57,13 @@ class VendasView(tk.Toplevel):
         self.desconto_entry.grid(row=0, column=1, sticky="w", padx=5)
         self.desconto_entry.bind("<KeyRelease>", lambda e: self.atualizar_total())
         tk.Label(rodape, text="Forma de Pagamento:").grid(row=1, column=0, sticky="w")
-        self.forma_pagamento = ttk.Combobox(rodape, values=["dinheiro", "pix", "crédito", "débito"], width=15)
+        self.forma_pagamento = ttk.Combobox(rodape, values=["dinheiro", "pix", "crédito", "débito", "boleto", "carteira", "fiado"], width=15)
         self.forma_pagamento.set("dinheiro")
         self.forma_pagamento.grid(row=1, column=1, padx=5, pady=5)
         tk.Label(rodape, text="Total:", font=("Arial", 14, "bold")).grid(row=0, column=2, sticky="e", padx=10)
         self.total_var = tk.StringVar(value="0.00")
         tk.Label(rodape, textvariable=self.total_var, font=("Arial", 16, "bold"), fg="green").grid(row=0, column=3, sticky="w")
 
-        # Finalizar venda
         tk.Button(frame, text="✅ Finalizar Venda", font=("Arial", 12, "bold"), bg="#4caf50", fg="white",
                   command=self.finalizar_venda, width=25).pack(pady=20)
 
@@ -182,13 +177,14 @@ class VendasView(tk.Toplevel):
         if not self.itens:
             messagebox.showwarning("Carrinho vazio", "Adicione produtos antes de finalizar.", parent=self)
             return
+
         data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         total = float(self.total_var.get().replace("R$", "").strip())
         try:
             desconto = float(self.desconto_entry.get())
         except:
             desconto = 0
-        forma = self.forma_pagamento.get()
+        forma = self.forma_pagamento.get().lower()
 
         venda_id = controller.salvar_venda(
             data,
@@ -211,10 +207,10 @@ class VendasView(tk.Toplevel):
             )
             produtos_controller.baixar_estoque(item['produto_id'], item['quantidade'])
 
-        # 💰 Gerar conta a receber automaticamente se houver cliente
-        if self.cliente_id:
-            vencimento = (datetime.datetime.now() + datetime.timedelta(days=5)).strftime("%Y-%m-%d")
-            contas_receber_controller.inserir_conta_receber(
+        formas_a_prazo = ["boleto", "carteira", "fiado"]
+        if self.cliente_id and forma in formas_a_prazo:
+            vencimento = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+            contas_receber_controller.criar_conta_receber(
                 venda_id=venda_id,
                 cliente_id=self.cliente_id,
                 valor_total=total,
@@ -224,3 +220,5 @@ class VendasView(tk.Toplevel):
 
         self.withdraw()
         gerar_dav_pdf(venda_id, self.itens, total, desconto, forma, self.nome_cliente)
+        messagebox.showinfo("Venda finalizada", "Venda registrada com sucesso!", parent=self)
+        self.destroy()

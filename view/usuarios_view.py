@@ -28,7 +28,8 @@ class UsuariosView:
         for i in self.tabela.get_children():
             self.tabela.delete(i)
         for row in obter_usuarios():
-            self.tabela.insert("", tk.END, values=row)
+            ativo_str = "Sim" if row[5] == 1 else "Não"
+            self.tabela.insert("", tk.END, values=(*row[:5], ativo_str))
 
     def abrir_adicionar(self):
         self._abrir_formulario()
@@ -70,13 +71,18 @@ class UsuariosView:
             senha_entry.insert(0, "*")
 
         def salvar():
-            nome = nome_entry.get()
-            usuario = usuario_entry.get()
-            senha = senha_entry.get()
-            tipo = tipo_entry.get()
+            nome = nome_entry.get().strip()
+            usuario = usuario_entry.get().strip()
+            senha = senha_entry.get().strip()
+            tipo = tipo_entry.get().strip()
+
+            if not nome or not usuario or not tipo or (not dados and not senha):
+                messagebox.showwarning("Campos obrigatórios", "Preencha todos os campos obrigatórios.")
+                return
 
             if dados:
                 atualizar_usuario(id_usuario, nome, usuario, tipo)
+                # Se quiser no futuro, pode tratar senha nova aqui
             else:
                 adicionar_usuario(nome, usuario, senha, tipo)
 
